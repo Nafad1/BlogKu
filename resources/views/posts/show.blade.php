@@ -2,142 +2,166 @@
 @section('title', $post->title)
 
 @section('content')
-<article class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
+<article class="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
     @if ($post->image)
-        <img src="{{ asset('storage/' . $post->image) }}" class="w-full h-64 object-cover rounded mb-6">
+        <img src="{{ asset('storage/' . $post->image) }}" class="w-full h-72 object-cover">
     @endif
 
-    <span class="text-sm font-semibold text-blue-600 uppercase">{{ $post->category->name }}</span>
-    <h1 class="text-4xl font-bold text-gray-800 mt-2 mb-4">{{ $post->title }}</h1>
+    <div class="p-8 md:p-10">
+        <span class="inline-block text-xs font-semibold text-[#d4a017] uppercase tracking-wider mb-3">{{ $post->category->name }}</span>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-800 leading-tight mb-5">{{ $post->title }}</h1>
 
-    @php
-        $wordCount = str_word_count(strip_tags($post->body));
-        $readingTime = max(1, ceil($wordCount / 200));
-    @endphp
+        @php
+            $wordCount = str_word_count(strip_tags($post->body));
+            $readingTime = max(1, ceil($wordCount / 200));
+        @endphp
 
-    <div class="text-sm text-gray-500 mb-6 flex flex-wrap items-center gap-3">
-        <span>Oleh <a href="{{ route('authors.show', $post->user) }}" class="text-blue-600 hover:underline font-semibold">{{ $post->user->name }}</a></span>
-        <span>·</span>
-        <span>{{ $post->created_at->format('d M Y') }}</span>
-        <span>·</span>
-        <span>⏱️ {{ $readingTime }} menit baca</span>
-    </div>
-
-    <div class="flex flex-wrap items-center gap-3 mb-6 py-4 border-t border-b">
-        <button id="likeBtn" 
-                data-url="{{ route('posts.like', $post) }}"
-                class="flex items-center gap-2 px-4 py-2 rounded-lg transition {{ auth()->check() && $post->isLikedBy(auth()->id()) ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-            <span>❤️</span>
-            <span id="likeCount">{{ $post->likes()->count() }}</span>
-            <span>Suka</span>
-        </button>
-
-        <button id="bookmarkBtn"
-                data-url="{{ route('posts.bookmark', $post) }}"
-                class="flex items-center gap-2 px-4 py-2 rounded-lg transition {{ auth()->check() && $post->isBookmarkedBy(auth()->id()) ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-            <span>🔖</span>
-            <span id="bookmarkCount">{{ $post->bookmarks()->count() }}</span>
-            <span>Simpan</span>
-        </button>
-
-        <span class="text-gray-500 ml-auto">👁️ {{ $post->views }} views</span>
-    </div>
-
-    <div class="prose max-w-none text-gray-700 leading-relaxed mb-8">
-        {!! $post->body !!}
-    </div>
-
-    <div class="flex flex-wrap gap-2 mb-6 py-4 border-t border-b">
-        <span class="text-sm font-semibold text-gray-600 self-center">Bagikan:</span>
-        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}" target="_blank" class="bg-blue-600 text-white text-sm px-4 py-1 rounded hover:bg-blue-700">Facebook</a>
-        <a href="https://twitter.com/intent/tweet?url={{ urlencode(url()->current()) }}&text={{ urlencode($post->title) }}" target="_blank" class="bg-sky-500 text-white text-sm px-4 py-1 rounded hover:bg-sky-600">Twitter</a>
-        <a href="https://wa.me/?text={{ urlencode($post->title . ' ' . url()->current()) }}" target="_blank" class="bg-green-500 text-white text-sm px-4 py-1 rounded hover:bg-green-600">WhatsApp</a>
-        <a href="https://t.me/share/url?url={{ urlencode(url()->current()) }}&text={{ urlencode($post->title) }}" target="_blank" class="bg-blue-400 text-white text-sm px-4 py-1 rounded hover:bg-blue-500">Telegram</a>
-    </div>
-
-    @auth
-        @can('update', $post)
-            <div class="flex gap-2 pt-4 border-t">
-                <a href="{{ route('posts.edit', $post) }}" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600">Edit</a>
-                <form action="{{ route('posts.destroy', $post) }}" method="POST" onsubmit="return confirm('Hapus artikel ini?')">
-                    @csrf @method('DELETE')
-                    <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Hapus</button>
-                </form>
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 pb-5 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-full bg-[#1a3d7c] text-white flex items-center justify-center text-xs font-bold">
+                    {{ strtoupper(substr($post->user->name, 0, 1)) }}
+                </div>
+                <a href="{{ route('authors.show', $post->user) }}" class="font-semibold text-slate-700 hover:text-[#1a3d7c]">{{ $post->user->name }}</a>
             </div>
-        @endcan
-    @endauth
+            <span class="text-slate-300">|</span>
+            <span>{{ $post->created_at->format('d M Y') }}</span>
+            <span class="text-slate-300">|</span>
+            <span>{{ $readingTime }} menit baca</span>
+            <span class="text-slate-300">|</span>
+            <span>{{ $post->views }} views</span>
+        </div>
 
-    <div class="mt-8 pt-4 border-t">
-        <a href="{{ route('home') }}" class="text-blue-600 hover:underline">← Kembali ke Beranda</a>
+        <div class="flex flex-wrap items-center gap-3 py-5 border-b border-slate-100">
+            <button id="likeBtn" data-url="{{ route('posts.like', $post) }}"
+                class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition border {{ auth()->check() && $post->isLikedBy(auth()->id()) ? 'bg-red-500 text-white border-red-500' : 'bg-white text-slate-700 border-slate-300 hover:border-red-400 hover:text-red-500' }}">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+                <span id="likeCount">{{ $post->likes()->count() }}</span>
+                <span>Suka</span>
+            </button>
+
+            <button id="bookmarkBtn" data-url="{{ route('posts.bookmark', $post) }}"
+                class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition border {{ auth()->check() && $post->isBookmarkedBy(auth()->id()) ? 'bg-[#d4a017] text-white border-[#d4a017]' : 'bg-white text-slate-700 border-slate-300 hover:border-[#d4a017] hover:text-[#d4a017]' }}">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-3-5 3V4z"/></svg>
+                <span id="bookmarkCount">{{ $post->bookmarks()->count() }}</span>
+                <span>Simpan</span>
+            </button>
+        </div>
+
+        <div class="prose prose-slate max-w-none py-8 text-slate-700 leading-relaxed">
+            {!! $post->body !!}
+        </div>
+
+        <div class="flex flex-wrap gap-2 py-5 border-t border-slate-100">
+            <span class="text-sm font-semibold text-slate-600 self-center mr-2">Bagikan:</span>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}" target="_blank" class="bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition">Facebook</a>
+            <a href="https://twitter.com/intent/tweet?url={{ urlencode(url()->current()) }}&text={{ urlencode($post->title) }}" target="_blank" class="bg-sky-500 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-sky-600 transition">Twitter</a>
+            <a href="https://wa.me/?text={{ urlencode($post->title . ' ' . url()->current()) }}" target="_blank" class="bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-emerald-600 transition">WhatsApp</a>
+            <a href="https://t.me/share/url?url={{ urlencode(url()->current()) }}&text={{ urlencode($post->title) }}" target="_blank" class="bg-sky-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-sky-700 transition">Telegram</a>
+        </div>
+
+        @auth
+            @can('update', $post)
+                <div class="flex gap-2 pt-5 border-t border-slate-100">
+                    <a href="{{ route('posts.edit', $post) }}" class="bg-[#1a3d7c] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#2a5bb0] transition">Edit Artikel</a>
+                    <form action="{{ route('posts.destroy', $post) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus artikel ini?')">
+                        @csrf @method('DELETE')
+                        <button class="bg-red-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-600 transition">Hapus</button>
+                    </form>
+                </div>
+            @endcan
+        @endauth
+
+        <div class="pt-6">
+            <a href="{{ route('home') }}" class="inline-flex items-center gap-2 text-sm font-medium text-[#1a3d7c] hover:underline">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Kembali ke Beranda
+            </a>
+        </div>
     </div>
 </article>
 
 @if ($relatedPosts->count() > 0)
-<section class="max-w-3xl mx-auto mt-8">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">Artikel Terkait</h2>
+<section class="max-w-3xl mx-auto mt-10">
+    <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <span class="w-1.5 h-5 bg-[#d4a017] rounded"></span>
+        Artikel Terkait
+    </h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         @foreach ($relatedPosts as $related)
-            <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+            <a href="{{ route('posts.show', $related->slug) }}" class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition group">
                 @if ($related->image)
-                    <img src="{{ asset('storage/' . $related->image) }}" class="w-full h-32 object-cover">
+                    <img src="{{ asset('storage/' . $related->image) }}" class="w-full h-32 object-cover group-hover:scale-105 transition duration-500">
                 @else
-                    <div class="w-full h-32 bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white text-2xl">📄</div>
+                    <div class="w-full h-32 unimed-gradient flex items-center justify-center text-white">
+                        <svg class="w-8 h-8 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
                 @endif
-                <div class="p-3">
-                    <h3 class="font-bold text-gray-800 text-sm mb-1">
-                        <a href="{{ route('posts.show', $related->slug) }}" class="hover:text-blue-600">{{ $related->title }}</a>
-                    </h3>
-                    <p class="text-xs text-gray-400">👁️ {{ $related->views }} views</p>
+                <div class="p-4">
+                    <h3 class="font-bold text-slate-800 text-sm leading-snug mb-2 group-hover:text-[#1a3d7c] transition">{{ Str::limit($related->title, 60) }}</h3>
+                    <p class="text-xs text-slate-400">{{ $related->views }} views</p>
                 </div>
-            </article>
+            </a>
         @endforeach
     </div>
 </section>
 @endif
 
-<section class="max-w-3xl mx-auto mt-8 bg-white rounded-lg shadow-md p-8">
-    <h2 class="text-xl font-bold text-gray-800 mb-4">
-        💬 Komentar ({{ $post->comments->count() }})
+<section class="max-w-3xl mx-auto mt-10 bg-white rounded-xl shadow-sm border border-slate-100 p-8">
+    <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+        <span class="w-1.5 h-5 bg-[#d4a017] rounded"></span>
+        Komentar ({{ $post->comments->count() }})
     </h2>
 
     @auth
-        <form action="{{ route('comments.store', $post) }}" method="POST" class="mb-6">
+        <form action="{{ route('comments.store', $post) }}" method="POST" class="mb-8">
             @csrf
-            <textarea name="body" rows="3" 
-                      class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:outline-none @error('body') border-red-500 @enderror"
-                      placeholder="Tulis komentar..."></textarea>
-            @error('body')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
-            <button type="submit" class="mt-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                Kirim Komentar
-            </button>
+            <div class="flex gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#1a3d7c] text-white flex items-center justify-center font-bold flex-shrink-0">
+                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                </div>
+                <div class="flex-1">
+                    <textarea name="body" rows="3"
+                              class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:border-[#1a3d7c] focus:ring-1 focus:ring-[#1a3d7c] focus:outline-none @error('body') border-red-500 @enderror"
+                              placeholder="Tulis komentar Anda..."></textarea>
+                    @error('body')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    <button type="submit" class="mt-2 bg-[#1a3d7c] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#2a5bb0] transition">
+                        Kirim Komentar
+                    </button>
+                </div>
+            </div>
         </form>
     @else
-        <p class="text-gray-500 mb-6">
-            <a href="{{ route('login') }}" class="text-blue-600 hover:underline">Login</a> untuk berkomentar.
-        </p>
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-8 text-sm text-slate-600">
+            <a href="{{ route('login') }}" class="text-[#1a3d7c] font-semibold hover:underline">Masuk</a> untuk berkomentar.
+        </div>
     @endauth
 
-    <div class="space-y-4">
+    <div class="space-y-5">
         @forelse ($post->comments as $comment)
-            <div class="border-l-4 border-blue-500 pl-4 py-2">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <strong class="text-gray-800">{{ $comment->user->name }}</strong>
-                        <span class="text-xs text-gray-400 ml-2">{{ $comment->created_at->diffForHumans() }}</span>
-                    </div>
-                    @auth
-                        @if (auth()->id() === $comment->user_id || auth()->user()->isAdmin())
-                            <form action="{{ route('comments.destroy', $comment) }}" method="POST" onsubmit="return confirm('Hapus komentar?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="text-red-500 text-sm hover:underline">Hapus</button>
-                            </form>
-                        @endif
-                    @endauth
+            <div class="flex gap-3 pb-5 border-b border-slate-100 last:border-0">
+                <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold flex-shrink-0">
+                    {{ strtoupper(substr($comment->user->name, 0, 1)) }}
                 </div>
-                <p class="text-gray-700 mt-1">{{ $comment->body }}</p>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start mb-1">
+                        <div>
+                            <strong class="text-slate-800 text-sm">{{ $comment->user->name }}</strong>
+                            <span class="text-xs text-slate-400 ml-2">{{ $comment->created_at->diffForHumans() }}</span>
+                        </div>
+                        @auth
+                            @if (auth()->id() === $comment->user_id || auth()->user()->isAdmin())
+                                <form action="{{ route('comments.destroy', $comment) }}" method="POST" onsubmit="return confirm('Hapus komentar ini?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="text-xs text-red-500 hover:text-red-700 font-medium">Hapus</button>
+                                </form>
+                            @endif
+                        @endauth
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">{{ $comment->body }}</p>
+                </div>
             </div>
         @empty
-            <p class="text-gray-500 text-center py-4">Belum ada komentar. Jadilah yang pertama!</p>
+            <p class="text-slate-400 text-center py-8 text-sm">Belum ada komentar. Jadilah yang pertama berkomentar.</p>
         @endforelse
     </div>
 </section>
@@ -145,61 +169,44 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const likeBtn = document.getElementById('likeBtn');
-    const bookmarkBtn = document.getElementById('bookmarkBtn');
-
     async function toggle(url) {
-        const token = '{{ csrf_token() }}';
-        const response = await fetch(url, {
+        return await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token,
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json',
             },
-        });
-        return await response.json();
+        }).then(r => r.json());
     }
 
-    if (likeBtn) {
-        likeBtn.addEventListener('click', async function() {
-            @guest
-                window.location.href = '{{ route('login') }}';
-                return;
-            @endguest
+    const likeBtn = document.getElementById('likeBtn');
+    if (likeBtn) likeBtn.addEventListener('click', async function() {
+        @guest window.location.href = '{{ route('login') }}'; return; @endguest
+        const data = await toggle(this.dataset.url);
+        document.getElementById('likeCount').textContent = data.count;
+        if (data.liked) {
+            likeBtn.classList.add('bg-red-500', 'text-white', 'border-red-500');
+            likeBtn.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
+        } else {
+            likeBtn.classList.remove('bg-red-500', 'text-white', 'border-red-500');
+            likeBtn.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
+        }
+    });
 
-            const data = await toggle(this.dataset.url);
-            document.getElementById('likeCount').textContent = data.count;
-
-            if (data.liked) {
-                likeBtn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-                likeBtn.classList.add('bg-red-500', 'text-white');
-            } else {
-                likeBtn.classList.remove('bg-red-500', 'text-white');
-                likeBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-            }
-        });
-    }
-
-    if (bookmarkBtn) {
-        bookmarkBtn.addEventListener('click', async function() {
-            @guest
-                window.location.href = '{{ route('login') }}';
-                return;
-            @endguest
-
-            const data = await toggle(this.dataset.url);
-            document.getElementById('bookmarkCount').textContent = data.count;
-
-            if (data.bookmarked) {
-                bookmarkBtn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-                bookmarkBtn.classList.add('bg-yellow-500', 'text-white');
-            } else {
-                bookmarkBtn.classList.remove('bg-yellow-500', 'text-white');
-                bookmarkBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-            }
-        });
-    }
+    const bookmarkBtn = document.getElementById('bookmarkBtn');
+    if (bookmarkBtn) bookmarkBtn.addEventListener('click', async function() {
+        @guest window.location.href = '{{ route('login') }}'; return; @endguest
+        const data = await toggle(this.dataset.url);
+        document.getElementById('bookmarkCount').textContent = data.count;
+        if (data.bookmarked) {
+            bookmarkBtn.classList.add('bg-[#d4a017]', 'text-white', 'border-[#d4a017]');
+            bookmarkBtn.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
+        } else {
+            bookmarkBtn.classList.remove('bg-[#d4a017]', 'text-white', 'border-[#d4a017]');
+            bookmarkBtn.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
+        }
+    });
 });
 </script>
 @endpush

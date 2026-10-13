@@ -1,6 +1,6 @@
 # BlogKu - Blog Multi-User
 
-Project Akhir Pemrograman Web - FMIPA UNIMED
+Project Akhir Pemrograman Web - Ilmu Komputer UNIMED
 
 ## Fitur
 
